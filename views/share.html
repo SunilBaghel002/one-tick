@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Result</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4F46E5", secondary: "#10B981" },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="min-h-screen bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+      <div class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+        <div class="flex items-center mb-6">
+          <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+            <img
+              id="studentImage"
+              class="w-full h-full object-cover object-top"
+            />
+          </div>
+          <div>
+            <h3 id="studentName" class="text-xl font-bold text-gray-800"></h3>
+            <p id="studentClass" class="text-gray-500"></p>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Marks</p>
+              <p
+                id="studentMarks"
+                class="text-lg font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p
+                id="studentEmail"
+                class="text-lg font-semibold text-gray-800"
+              ></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const studentId = window.location.pathname.split("/").pop();
+        const response = await fetch(`/api/students/${studentId}`);
+        const student = await response.json();
+        if (student) {
+          document.getElementById("studentImage").src = student.image;
+          document.getElementById("studentName").textContent = student.name;
+          document.getElementById("studentClass").textContent = student.class;
+          document.getElementById(
+            "studentMarks"
+          ).textContent = `${student.marks}%`;
+          document.getElementById("studentEmail").textContent = student.email;
+        }
+      });
+    </script>
+  </body>
+</html>

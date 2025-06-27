@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Results Dashboard</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4F46E5", secondary: "#10B981" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="min-h-screen">
+    <header class="bg-white shadow-sm py-4">
+      <div class="container mx-auto px-4 flex justify-between items-center">
+        <h1 class="text-2xl font-['Pacifico'] text-gray-800">
+          Student Results
+        </h1>
+        <div class="flex items-center space-x-6">
+          <a
+            href="/admin"
+            class="text-gray-600 hover:text-primary transition-colors"
+            >Admin Panel</a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="container mx-auto px-4 py-8">
+      <section class="mb-12">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-3xl font-bold text-gray-800">Top Performers</h2>
+          <div class="text-sm text-gray-500">Last updated: June 27, 2025</div>
+        </div>
+        <div
+          id="top-performers"
+          class="flex flex-col lg:flex-row justify-center items-center lg:items-end gap-6 mb-12"
+        ></div>
+      </section>
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">All Students</h2>
+        <div class="bg-white rounded-lg shadow-md overflow-x-auto mb-8">
+          <table class="w-full min-w-[800px]">
+            <thead>
+              <tr class="bg-gray-50 border-b">
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  ID
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Name
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Class
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Marks
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Email
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="student-table"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <div
+      id="shareModal"
+      class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div
+        class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
+      >
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800">
+              Share Student Result
+            </h3>
+            <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+              <i class="ri-close-line ri-lg"></i>
+            </button>
+          </div>
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+              <img
+                id="modalImage"
+                class="w-full h-full object-cover object-top"
+              />
+            </div>
+            <div>
+              <h4
+                id="modalName"
+                class="text-lg font-semibold text-gray-800"
+              ></h4>
+              <div class="flex items-center text-sm text-gray-500">
+                <span
+                  id="modalRank"
+                  class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-medium mr-2"
+                ></span>
+                <span id="modalClass"></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Marks</p>
+                <p
+                  id="modalMarks"
+                  class="text-lg font-semibold text-gray-800"
+                ></p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Email</p>
+                <p
+                  id="modalEmail"
+                  class="text-lg font-semibold text-gray-800"
+                ></p>
+              </div>
+            </div>
+          </div>
+          <div class="relative">
+            <input
+              id="modalLink"
+              type="text"
+              readonly
+              class="w-full bg-gray-100 border-none rounded-lg py-3 px-4 pr-12 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
+            />
+            <button
+              id="copyLinkBtn"
+              class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary"
+            >
+              <i class="ri-file-copy-line ri-lg"></i>
+              <span id="copyTooltip" class="tooltip">Copied!</span>
+            </button>
+          </div>
+          <div class="mt-6">
+            <p class="text-sm text-gray-500 mb-3">Share via</p>
+            <div class="flex space-x-4">
+              <button
+                id="linkedinShareBtn"
+                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200"
+              >
+                <i class="ri-linkedin-fill"></i>
+              </button>
+              <button
+                id="twitterShareBtn"
+                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 hover:bg-blue-200"
+              >
+                <i class="ri-twitter-x-fill"></i>
+              </button>
+              <button
+                id="whatsappShareBtn"
+                class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200"
+              >
+                <i class="ri-whatsapp-fill"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
