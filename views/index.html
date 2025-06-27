@@ -77,7 +77,7 @@
                 <th
                   class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
                 >
-                  ID
+                  Rank
                 </th>
                 <th
                   class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
@@ -87,7 +87,12 @@
                 <th
                   class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
                 >
-                  Class
+                  Course
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  College
                 </th>
                 <th
                   class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
@@ -112,11 +117,76 @@
       </section>
     </main>
     <div
+      id="studentSidebar"
+      class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300"
+    >
+      <div class="p-6">
+        <button
+          id="closeSidebar"
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        >
+          <i class="ri-close-line ri-lg"></i>
+        </button>
+        <div class="flex items-center mb-6">
+          <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+            <img
+              id="sidebarImage"
+              class="w-full h-full object-cover object-top"
+            />
+          </div>
+          <div>
+            <h4
+              id="sidebarName"
+              class="text-lg font-semibold text-gray-800"
+            ></h4>
+            <div class="flex items-center text-sm text-gray-500">
+              <span
+                id="sidebarRank"
+                class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-medium mr-2"
+              ></span>
+              <span id="sidebarCourse"></span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">College</p>
+              <p
+                id="sidebarCollege"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Marks</p>
+              <p
+                id="sidebarMarks"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p
+                id="sidebarEmail"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+          </div>
+        </div>
+        <button
+          id="openShareModal"
+          class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+        >
+          Share Profile
+        </button>
+      </div>
+    </div>
+    <div
       id="shareModal"
-      class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 opacity-0 pointer-events-none transition-opacity duration-300"
     >
       <div
-        class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md mx-4"
+        class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md mx-4 transform scale-95 transition-transform duration-300"
       >
         <div class="p-6">
           <div class="flex justify-between items-center mb-6">
@@ -144,12 +214,19 @@
                   id="modalRank"
                   class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-medium mr-2"
                 ></span>
-                <span id="modalClass"></span>
+                <span id="modalCourse"></span>
               </div>
             </div>
           </div>
           <div class="bg-gray-50 rounded-lg p-4 mb-6">
             <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">College</p>
+                <p
+                  id="modalCollege"
+                  class="text-lg font-semibold text-gray-800"
+                ></p>
+              </div>
               <div>
                 <p class="text-sm text-gray-500 mb-1">Marks</p>
                 <p

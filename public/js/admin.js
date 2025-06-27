@@ -39,7 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
         (student) => `
       <tr class="border-b">
         <td class="py-4 px-6 text-sm text-gray-600">${student.name}</td>
-        <td class="py-4 px-6 text-sm text-gray-600">${student.class}</td>
+        <td class="py-4 px-6 text-sm text-gray-600">${student.course}</td>
+        <td class="py-4 px-6 text-sm text-gray-600">${student.collegeName}</td>
         <td class="py-4 px-6 text-sm text-gray-600">${student.marks}%</td>
         <td class="py-4 px-6 text-sm text-gray-600">${student.email}</td>
         <td class="py-4 px-6">
@@ -66,17 +67,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(studentForm);
     const student = {
       name: formData.get("name"),
-      class: formData.get("class"),
+      course: formData.get("course"),
+      collegeName: formData.get("collegeName"),
       marks: parseInt(formData.get("marks")),
       email: formData.get("email"),
       image: formData.get("image"),
     };
-    await fetch("/api/students", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(student),
-    });
-    studentForm.reset();
-    loadStudents();
+    try {
+      await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(student),
+      });
+      studentForm.reset();
+      loadStudents();
+    } catch (err) {
+      alert("Failed to add student");
+    }
   });
 });

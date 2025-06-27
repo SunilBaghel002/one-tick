@@ -18,10 +18,10 @@ body {
   visibility: visible;
 }
 .modal-content {
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
+  transform: scale(0.95);
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
-.modal.active .modal-content {
+.modal:not(.opacity-0) .modal-content {
   transform: scale(1);
 }
 .share-button {
@@ -88,4 +88,7 @@ input[type="number"]::-webkit-outer-spin-button {
   border-width: 5px;
   border-style: solid;
   border-color: #1f2937 transparent transparent transparent;
+}
+#studentSidebar {
+  transition: transform 0.3s ease;
 }

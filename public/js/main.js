@@ -1,12 +1,23 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const topPerformersDiv = document.getElementById("top-performers");
   const studentTable = document.getElementById("student-table");
+  const studentSidebar = document.getElementById("studentSidebar");
+  const closeSidebar = document.getElementById("closeSidebar");
   const shareModal = document.getElementById("shareModal");
   const closeModal = document.getElementById("closeModal");
+  const openShareModal = document.getElementById("openShareModal");
+  const sidebarImage = document.getElementById("sidebarImage");
+  const sidebarName = document.getElementById("sidebarName");
+  const sidebarRank = document.getElementById("sidebarRank");
+  const sidebarCourse = document.getElementById("sidebarCourse");
+  const sidebarCollege = document.getElementById("sidebarCollege");
+  const sidebarMarks = document.getElementById("sidebarMarks");
+  const sidebarEmail = document.getElementById("sidebarEmail");
   const modalImage = document.getElementById("modalImage");
   const modalName = document.getElementById("modalName");
   const modalRank = document.getElementById("modalRank");
-  const modalClass = document.getElementById("modalClass");
+  const modalCourse = document.getElementById("modalCourse");
+  const modalCollege = document.getElementById("modalCollege");
   const modalMarks = document.getElementById("modalMarks");
   const modalEmail = document.getElementById("modalEmail");
   const modalLink = document.getElementById("modalLink");
@@ -15,6 +26,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkedinShareBtn = document.getElementById("linkedinShareBtn");
   const twitterShareBtn = document.getElementById("twitterShareBtn");
   const whatsappShareBtn = document.getElementById("whatsappShareBtn");
+
+  let currentStudentId = null; // Store current student ID for sidebar and modal
 
   // Fetch students
   const response = await fetch("/api/students");
@@ -54,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <h3 class="text-xl font-semibold text-gray-800 mb-1">${
           student.name
         }</h3>
-        <p class="text-gray-500 text-sm mb-3">${student.class}</p>
+        <p class="text-gray-500 text-sm mb-3">${student.course}</p>
         <button class="share-card-btn mt-4 bg-primary/10 text-primary px-4 py-2 rounded-full flex items-center gap-2 hover:bg-primary/20 transition-colors !rounded-button">
           <i class="ri-share-line"></i>
           <span>Share Profile</span>
@@ -80,20 +93,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Render student table
   studentTable.innerHTML = students
     .map(
-      (student) => `
+      (student, index) => `
     <tr class="border-b hover:bg-gray-50">
-      <td class="py-4 px-6 text-sm text-gray-600">${student._id}</td>
+      <td class="py-4 px-6 text-sm text-gray-600">${index + 1}</td>
       <td class="py-4 px-6">
         <div class="flex items-center">
-          <img class="w-8 h-8 rounded-full mr-3 object-cover object-top" src="${student.image}" alt="${student.name}" />
+          <img class="w-8 h-8 rounded-full mr-3 object-cover object-top" src="${
+            student.image
+          }" alt="${student.name}" />
           <span class="font-medium text-gray-800">${student.name}</span>
         </div>
       </td>
-      <td class="py-4 px-6 text-sm text-gray-600">${student.class}</td>
+      <td class="py-4 px-6 text-sm text-gray-600">${student.course}</td>
+      <td class="py-4 px-6 text-sm text-gray-600">${student.collegeName}</td>
       <td class="py-4 px-6 text-sm text-gray-600">${student.marks}%</td>
       <td class="py-4 px-6 text-sm text-gray-600">${student.email}</td>
       <td class="py-4 px-6">
-        <button class="text-primary hover:text-primary/80 share-table-btn" data-student-id="${student._id}">
+        <button class="text-primary hover:text-primary/80 share-table-btn" data-student-id="${
+          student._id
+        }">
           <i class="ri-share-line ri-lg"></i>
         </button>
       </td>
@@ -102,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     )
     .join("");
 
-  // Share button handlers
+  // Share button handlers (open sidebar)
   document
     .querySelectorAll(".share-card-btn, .share-table-btn")
     .forEach((btn) => {
@@ -110,26 +128,54 @@ document.addEventListener("DOMContentLoaded", async () => {
         const studentId =
           e.target.closest("button").dataset.studentId ||
           e.target.closest(".performer-card").dataset.studentId;
+        currentStudentId = studentId; // Store studentId for modal
         const response = await fetch(`/api/students/${studentId}`);
         const student = await response.json();
         const rank = students.findIndex((s) => s._id === studentId) + 1;
-        modalImage.src = student.image;
-        modalName.textContent = student.name;
-        modalRank.textContent = `Rank #${rank}`;
-        modalClass.textContent = student.class;
-        modalMarks.textContent = `${student.marks}%`;
-        modalEmail.textContent = student.email;
-        modalLink.value = `${window.location.origin}/share/${studentId}`;
-        shareModal.classList.add("active");
+        sidebarImage.src = student.image;
+        sidebarName.textContent = student.name;
+        sidebarRank.textContent = `Rank #${rank}`;
+        sidebarCourse.textContent = student.course;
+        sidebarCollege.textContent = student.collegeName;
+        sidebarMarks.textContent = `${student.marks}%`;
+        sidebarEmail.textContent = student.email;
+        studentSidebar.classList.remove("translate-x-full");
       });
     });
 
-  // Modal interactions
-  closeModal.addEventListener("click", () =>
-    shareModal.classList.remove("active")
-  );
+  // Open share modal from sidebar
+  openShareModal.addEventListener("click", async () => {
+    if (!currentStudentId) return; // Prevent modal if no studentId
+    const response = await fetch(`/api/students/${currentStudentId}`);
+    const student = await response.json();
+    const rank = students.findIndex((s) => s._id === currentStudentId) + 1;
+    modalImage.src = student.image;
+    modalName.textContent = student.name;
+    modalRank.textContent = `Rank #${rank}`;
+    modalCourse.textContent = student.course;
+    modalCollege.textContent = student.collegeName;
+    modalMarks.textContent = `${student.marks}%`;
+    modalEmail.textContent = student.email;
+    modalLink.value = `${window.location.origin}/share/${currentStudentId}`;
+    shareModal.classList.remove("opacity-0", "pointer-events-none");
+    shareModal.querySelector(".modal-content").classList.remove("scale-95");
+  });
+
+  // Close sidebar
+  closeSidebar.addEventListener("click", () => {
+    studentSidebar.classList.add("translate-x-full");
+  });
+
+  // Close modal
+  closeModal.addEventListener("click", () => {
+    shareModal.classList.add("opacity-0", "pointer-events-none");
+    shareModal.querySelector(".modal-content").classList.add("scale-95");
+  });
   shareModal.addEventListener("click", (e) => {
-    if (e.target === shareModal) shareModal.classList.remove("active");
+    if (e.target === shareModal) {
+      shareModal.classList.add("opacity-0", "pointer-events-none");
+      shareModal.querySelector(".modal-content").classList.add("scale-95");
+    }
   });
 
   // Copy link
