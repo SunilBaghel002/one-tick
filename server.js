@@ -14,10 +14,7 @@ app.use(express.static("public"));
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URL)
   .then(() => console.log("database connected"))
   .catch((err) => console.log("error", err));
 
@@ -44,7 +41,6 @@ async function initializeAdmin() {
   if (adminCount === 0) {
     const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASS, 10);
     await new Admin({ password: hashedPassword }).save();
-    console.log("Admin password initialized");
   }
 }
 initializeAdmin();
