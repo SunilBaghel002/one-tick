@@ -104,7 +104,7 @@ app.get("/share/:id", async (req, res) => {
       return res.status(404).send("Student not found");
     }
 
-    const baseUrl = process.env.VERCEL_URL || "http://localhost:8000";
+    const baseUrl = process.env.VERCEL_URL || "https://one-tick.vercel.app";
     const shareUrl = `${baseUrl}/share/${req.params.id}`;
     const title = `${student.name}'s Result`;
     const description = `${student.name} achieved ${student.marks}% in ${student.course} at ${student.collegeName}.`;
@@ -120,6 +120,8 @@ app.get("/share/:id", async (req, res) => {
         <meta property="og:title" content="${title}" />
         <meta property="og:description" content="${description}" />
         <meta property="og:image" content="${student.image}" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content="${shareUrl}" />
         <meta property="og:type" content="website" />
         <!-- Twitter Card -->
@@ -133,7 +135,7 @@ app.get("/share/:id", async (req, res) => {
         <p>${description}</p>
         <img src="${student.image}" alt="${student.name}" />
         <script>
-          window.location.href = "${shareUrl}";
+          window.location.href = "/share/${req.params.id}";
         </script>
       </body>
       </html>

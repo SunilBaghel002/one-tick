@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const twitterShareBtn = document.getElementById("twitterShareBtn");
   const whatsappShareBtn = document.getElementById("whatsappShareBtn");
 
+  const baseUrl = window.location.hostname.includes("vercel.app")
+    ? "https://one-tick.vercel.app"
+    : "http://localhost:8000";
   let currentStudentId = null; // Store current student ID for sidebar and modal
 
   // Fetch students
@@ -156,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     modalCollege.textContent = student.collegeName;
     modalMarks.textContent = `${student.marks}%`;
     modalEmail.textContent = student.email;
-    modalLink.value = `${window.location.origin}/share/${currentStudentId}`;
+    modalLink.value = `${baseUrl}/share/${currentStudentId}`;
     shareModal.classList.remove("opacity-0", "pointer-events-none");
     shareModal.querySelector(".modal-content").classList.remove("scale-95");
   });
