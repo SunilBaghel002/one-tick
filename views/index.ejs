@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Results Dashboard</title>
+    <meta property="og:title" content="Student Results Dashboard" />
+    <meta
+      property="og:description"
+      content="View top student performances and share their achievements!"
+    />
+    <meta property="og:image" content="/images/default-student.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://one-tick.vercel.app" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Student Results Dashboard" />
+    <meta
+      name="twitter:description"
+      content="View top student performances and share their achievements!"
+    />
+    <meta name="twitter:image" content="/images/default-student.jpg" />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
       tailwind.config = {
@@ -34,6 +51,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
     />
     <link rel="stylesheet" href="/css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   </head>
   <body
     class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-inter"
@@ -52,7 +70,6 @@
       </div>
     </header>
     <main class="container mx-auto px-4 py-8">
-      <!-- Loading Spinner -->
       <div
         id="loadingSpinner"
         class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -307,6 +324,6 @@
         </div>
       </div>
     </div>
-    <script type="module" src="/js/main.js"></script>
+    <script defer src="/js/main.js"></script>
   </body>
 </html>

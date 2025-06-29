@@ -1,5 +1,3 @@
-import QRCode from "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm";
-
 document.addEventListener("DOMContentLoaded", async () => {
   const topPerformersDiv = document.getElementById("top-performers");
   const studentTable = document.getElementById("student-table");
@@ -37,9 +35,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     : "http://localhost:8000";
   let currentStudentId = null;
   let students = [];
-
-  // Create canvas for QR code
-  let qrCanvas = null;
 
   // Fetch students
   async function fetchStudents() {
@@ -165,15 +160,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!response.ok) throw new Error("Failed to fetch student");
             const student = await response.json();
             const rank = students.findIndex((s) => s._id === studentId) + 1;
-            sidebarImage.src = student.image;
-            sidebarName.textContent = student.name;
-            sidebarRank.textContent = `Rank #${rank}`;
-            sidebarCourse.textContent = student.course;
-            sidebarCollege.textContent = student.collegeName;
-            sidebarMarks.textContent = `${student.marks}%`;
-            sidebarEmail.textContent = student.email;
-            sidebarProgress.style.width = `${student.marks}%`;
-            studentSidebar.classList.remove("translate-x-full");
+            if (sidebarImage) sidebarImage.src = student.image;
+            if (sidebarName) sidebarName.textContent = student.name;
+            if (sidebarRank) sidebarRank.textContent = `Rank #${rank}`;
+            if (sidebarCourse) sidebarCourse.textContent = student.course;
+            if (sidebarCollege)
+              sidebarCollege.textContent = student.collegeName;
+            if (sidebarMarks) sidebarMarks.textContent = `${student.marks}%`;
+            if (sidebarEmail) sidebarEmail.textContent = student.email;
+            if (sidebarProgress)
+              sidebarProgress.style.width = `${student.marks}%`;
+            if (studentSidebar)
+              studentSidebar.classList.remove("translate-x-full");
           } catch (err) {
             console.error("Error fetching student:", err);
           } finally {
@@ -184,15 +182,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Generate QR code
-  async function generateQRCode(url) {
+  function generateQRCode(url) {
+    if (!qrCode) return;
     qrCode.innerHTML = ""; // Clear previous QR code
-    qrCanvas = document.createElement("canvas");
-    qrCanvas.id = "qrCanvas";
-    qrCode.appendChild(qrCanvas);
+    if (!window.QRCode) {
+      console.error("QRCode library not loaded");
+      qrCode.innerHTML =
+        '<p class="text-red-500 text-sm">QR code library failed to load</p>';
+      return;
+    }
     try {
-      await QRCode.toCanvas(qrCanvas, url, {
+      new QRCode(qrCode, {
+        text: url,
         width: 120,
-        errorCorrectionLevel: "H",
+        height: 120,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
       });
     } catch (err) {
       console.error("QR Code generation error:", err);
@@ -202,115 +208,153 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Open share modal
-  openShareModal.addEventListener("click", async () => {
-    if (!currentStudentId) return;
-    try {
-      loadingSpinner.classList.remove("hidden");
-      const response = await fetch(`/api/students/${currentStudentId}`);
-      if (!response.ok) throw new Error("Failed to fetch student");
-      const student = await response.json();
-      const rank = students.findIndex((s) => s._id === currentStudentId) + 1;
-      modalImage.src = student.image;
-      modalName.textContent = student.name;
-      modalRank.textContent = `Rank #${rank}`;
-      modalCourse.textContent = student.course;
-      modalCollege.textContent = student.collegeName;
-      modalMarks.textContent = `${student.marks}%`;
-      modalEmail.textContent = student.email;
-      modalLink.value = `${baseUrl}/share/${currentStudentId}`;
-      await generateQRCode(modalLink.value);
-      shareModal.classList.remove("opacity-0", "pointer-events-none");
-      shareModal.querySelector(".modal-content").classList.remove("scale-95");
-    } catch (err) {
-      console.error("Error opening share modal:", err);
-    } finally {
-      loadingSpinner.classList.add("hidden");
-    }
-  });
+  if (openShareModal) {
+    openShareModal.addEventListener("click", () => {
+      if (!currentStudentId) return;
+      try {
+        loadingSpinner.classList.remove("hidden");
+        fetch(`/api/students/${currentStudentId}`)
+          .then((response) => {
+            if (!response.ok) throw new Error("Failed to fetch student");
+            return response.json();
+          })
+          .then((student) => {
+            const rank =
+              students.findIndex((s) => s._id === currentStudentId) + 1;
+            if (modalImage) modalImage.src = student.image;
+            if (modalName) modalName.textContent = student.name;
+            if (modalRank) modalRank.textContent = `Rank #${rank}`;
+            if (modalCourse) modalCourse.textContent = student.course;
+            if (modalCollege) modalCollege.textContent = student.collegeName;
+            if (modalMarks) modalMarks.textContent = `${student.marks}%`;
+            if (modalEmail) modalEmail.textContent = student.email;
+            if (modalLink)
+              modalLink.value = `${baseUrl}/share/${currentStudentId}`;
+            generateQRCode(modalLink.value);
+            if (shareModal) {
+              shareModal.classList.remove("opacity-0", "pointer-events-none");
+              shareModal
+                .querySelector(".modal-content")
+                .classList.remove("scale-95");
+            }
+          })
+          .catch((err) => {
+            console.error("Error opening share modal:", err);
+          })
+          .finally(() => {
+            loadingSpinner.classList.add("hidden");
+          });
+      } catch (err) {
+        console.error("Error opening share modal:", err);
+        loadingSpinner.classList.add("hidden");
+      }
+    });
+  } else {
+    console.error("openShareModal element not found");
+  }
 
   // Download QR code
-  downloadQrBtn.addEventListener("click", () => {
-    if (qrCanvas && qrCanvas.getContext) {
-      try {
-        const dataUrl = qrCanvas.toDataURL("image/png");
-        const link = document.createElement("a");
-        link.href = dataUrl;
-        link.download = `student-qr-${currentStudentId}.png`;
-        link.click();
-      } catch (err) {
-        console.error("QR Code download error:", err);
-        qrCode.innerHTML =
-          '<p class="text-red-500 text-sm">Failed to download QR code</p>';
+  if (downloadQrBtn) {
+    downloadQrBtn.addEventListener("click", () => {
+      const qrCanvas = qrCode.querySelector("canvas");
+      if (qrCanvas && qrCanvas.getContext) {
+        try {
+          const dataUrl = qrCanvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.href = dataUrl;
+          link.download = `student-qr-${currentStudentId}.png`;
+          link.click();
+        } catch (err) {
+          console.error("QR Code download error:", err);
+          if (qrCode)
+            qrCode.innerHTML =
+              '<p class="text-red-500 text-sm">Failed to download QR code</p>';
+        }
+      } else {
+        console.error("QR Code canvas not available");
+        if (qrCode)
+          qrCode.innerHTML =
+            '<p class="text-red-500 text-sm">QR code not generated</p>';
       }
-    } else {
-      console.error("QR Code canvas not available");
-      qrCode.innerHTML =
-        '<p class="text-red-500 text-sm">QR code not generated</p>';
-    }
-  });
+    });
+  }
 
   // Close sidebar
-  closeSidebar.addEventListener("click", () => {
-    studentSidebar.classList.add("translate-x-full");
-  });
+  if (closeSidebar) {
+    closeSidebar.addEventListener("click", () => {
+      if (studentSidebar) studentSidebar.classList.add("translate-x-full");
+    });
+  }
 
   // Close modal
-  closeModal.addEventListener("click", () => {
-    shareModal.classList.add("opacity-0", "pointer-events-none");
-    shareModal.querySelector(".modal-content").classList.add("scale-95");
-  });
-  shareModal.addEventListener("click", (e) => {
-    if (e.target === shareModal) {
-      shareModal.classList.add("opacity-0", "pointer-events-none");
-      shareModal.querySelector(".modal-content").classList.add("scale-95");
-    }
-  });
+  if (closeModal) {
+    closeModal.addEventListener("click", () => {
+      if (shareModal) {
+        shareModal.classList.add("opacity-0", "pointer-events-none");
+        shareModal.querySelector(".modal-content").classList.add("scale-95");
+      }
+    });
+    shareModal.addEventListener("click", (e) => {
+      if (e.target === shareModal) {
+        shareModal.classList.add("opacity-0", "pointer-events-none");
+        shareModal.querySelector(".modal-content").classList.add("scale-95");
+      }
+    });
+  }
 
   // Copy link
-  copyLinkBtn.addEventListener("click", () => {
-    modalLink.select();
-    document.execCommand("copy");
-    copyTooltip.classList.remove("opacity-0", "visibility-hidden");
-    setTimeout(() => {
-      copyTooltip.classList.add("opacity-0", "visibility-hidden");
-    }, 2000);
-  });
+  if (copyLinkBtn) {
+    copyLinkBtn.addEventListener("click", () => {
+      if (modalLink) {
+        modalLink.select();
+        document.execCommand("copy");
+        copyTooltip.classList.remove("opacity-0", "visibility-hidden");
+        setTimeout(() => {
+          copyTooltip.classList.add("opacity-0", "visibility-hidden");
+        }, 2000);
+      }
+    });
+  }
 
   // Social sharing
   const getShareMessage = () => {
     const student = students.find((s) => s._id === currentStudentId);
-    if (!student) return `Check out this student's results: ${modalLink.value}`;
-    return (
-      `🎉 *${student.name}'s Achievement* 🎉\n` +
-      `Rank: #${students.findIndex((s) => s._id === currentStudentId) + 1}\n` +
-      `Course: ${student.course}\n` +
-      `Marks: ${student.marks}%\n` +
-      `College: ${student.collegeName}\n` +
-      `View details: ${modalLink.value}`
-    );
+    if (!student || !modalLink)
+      return `Check out this student's results: ${baseUrl}/share/${currentStudentId}`;
+    return `${student.name}'s Achievement\nRank: #${
+      students.findIndex((s) => s._id === currentStudentId) + 1
+    }\nCourse: ${student.course}\nMarks: ${student.marks}%\nCollege: ${
+      student.collegeName
+    }\nDetails: ${modalLink.value}`;
   };
 
-  linkedinShareBtn.addEventListener("click", () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-      modalLink.value
-    )}&title=${encodeURIComponent("Check out this student's results!")}`;
-    window.open(url, "linkedin-share-dialog", "width=600,height=400");
-  });
+  if (linkedinShareBtn) {
+    linkedinShareBtn.addEventListener("click", () => {
+      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+        modalLink.value
+      )}&title=${encodeURIComponent("Check out this student's results!")}`;
+      window.open(url, "linkedin-share-dialog", "width=600,height=400");
+    });
+  }
 
-  twitterShareBtn.addEventListener("click", () => {
-    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-      modalLink.value
-    )}&text=${encodeURIComponent("Check out this student's results!")}`;
-    window.open(url, "twitter-share-dialog", "width=600,height=400");
-  });
+  if (twitterShareBtn) {
+    twitterShareBtn.addEventListener("click", () => {
+      const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+        modalLink.value
+      )}&text=${encodeURIComponent("Check out this student's results!")}`;
+      window.open(url, "twitter-share-dialog", "width=600,height=400");
+    });
+  }
 
-  whatsappShareBtn.addEventListener("click", () => {
-    const text = getShareMessage();
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-      text
-    )}`;
-    window.open(url, "_blank");
-  });
+  if (whatsappShareBtn) {
+    whatsappShareBtn.addEventListener("click", () => {
+      const text = getShareMessage();
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+        text
+      )}`;
+      window.open(url, "_blank");
+    });
+  }
 
   // Handle share page
   if (window.location.pathname.startsWith("/share")) {
@@ -322,38 +366,44 @@ document.addEventListener("DOMContentLoaded", async () => {
       const student = await response.json();
       if (student) {
         currentStudentId = studentId;
-        document.getElementById("studentImage").src = student.image;
-        document.getElementById("studentName").textContent = student.name;
-        document.getElementById("studentCourse").textContent = student.course;
-        document.getElementById("studentCollege").textContent =
-          student.collegeName;
-        document.getElementById(
-          "studentMarks"
-        ).textContent = `${student.marks}%`;
-        document.getElementById("studentEmail").textContent = student.email;
-        modalImage.src = student.image;
-        modalName.textContent = student.name;
-        modalRank.textContent = `Rank #${
-          students.findIndex((s) => s._id === studentId) + 1 || "N/A"
-        }`;
-        modalCourse.textContent = student.course;
-        modalCollege.textContent = student.collegeName;
-        modalMarks.textContent = `${student.marks}%`;
-        modalEmail.textContent = student.email;
-        modalLink.value = `${baseUrl}/share/${studentId}`;
-        await generateQRCode(modalLink.value);
+        if (document.getElementById("studentImage"))
+          document.getElementById("studentImage").src = student.image;
+        if (document.getElementById("studentName"))
+          document.getElementById("studentName").textContent = student.name;
+        if (document.getElementById("studentCourse"))
+          document.getElementById("studentCourse").textContent = student.course;
+        if (document.getElementById("studentCollege"))
+          document.getElementById("studentCollege").textContent =
+            student.collegeName;
+        if (document.getElementById("studentMarks"))
+          document.getElementById(
+            "studentMarks"
+          ).textContent = `${student.marks}%`;
+        if (document.getElementById("studentEmail"))
+          document.getElementById("studentEmail").textContent = student.email;
+        if (modalImage) modalImage.src = student.image;
+        if (modalName) modalName.textContent = student.name;
+        if (modalRank)
+          modalRank.textContent = `Rank #${
+            students.findIndex((s) => s._id === studentId) + 1 || "N/A"
+          }`;
+        if (modalCourse) modalCourse.textContent = student.course;
+        if (modalCollege) modalCollege.textContent = student.collegeName;
+        if (modalMarks) modalMarks.textContent = `${student.marks}%`;
+        if (modalEmail) modalEmail.textContent = student.email;
+        if (modalLink) modalLink.value = `${baseUrl}/share/${studentId}`;
+        generateQRCode(modalLink.value);
+      } else {
+        console.error("Student data not found");
       }
     } catch (err) {
       console.error("Error fetching student:", err);
-      qrCode.innerHTML =
-        '<p class="text-red-500 text-sm">Failed to load student data</p>';
+      if (qrCode)
+        qrCode.innerHTML =
+          '<p class="text-red-500 text-sm">Failed to load student data</p>';
     } finally {
       loadingSpinner.classList.add("hidden");
     }
-    openShareModal.addEventListener("click", () => {
-      shareModal.classList.remove("opacity-0", "pointer-events-none");
-      shareModal.querySelector(".modal-content").classList.remove("scale-95");
-    });
   } else {
     fetchStudents();
   }

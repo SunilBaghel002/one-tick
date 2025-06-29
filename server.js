@@ -46,19 +46,19 @@ app.get("/share/:id", async (req, res) => {
       return res.status(404).send("Student not found");
     }
     const baseUrl = process.env.VERCEL_URL || "http://localhost:8000";
+    const rank =
+      (await Student.countDocuments({ marks: { $gt: student.marks } })) + 1;
     res.render("share", {
       ogTitle: `${student.name}'s Achievement`,
-      ogDescription: `Rank #${
-        (await Student.countDocuments({ marks: { $gt: student.marks } })) + 1
-      } | ${student.course} | ${student.marks}% | ${student.collegeName}`,
-      ogImage: student.image,
+      ogDescription: `Rank #${rank} | Course: ${student.course} | Marks: ${student.marks}% | College: ${student.collegeName}`,
+      ogImage: student.image || "/images/default-student.jpg",
+      ogImageWidth: "1200",
+      ogImageHeight: "630",
       ogUrl: `${baseUrl}/share/${student._id}`,
       twitterCard: "summary_large_image",
       twitterTitle: `${student.name}'s Achievement`,
-      twitterDescription: `Rank #${
-        (await Student.countDocuments({ marks: { $gt: student.marks } })) + 1
-      } | ${student.course} | ${student.marks}% | ${student.collegeName}`,
-      twitterImage: student.image,
+      twitterDescription: `Rank #${rank} | Course: ${student.course} | Marks: ${student.marks}% | College: ${student.collegeName}`,
+      twitterImage: student.image || "/images/default-student.jpg",
     });
   } catch (err) {
     console.error("Error fetching student:", err);

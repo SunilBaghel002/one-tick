@@ -4,15 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Result</title>
-    <meta property="og:title" content="<%= ogTitle %>" />
-    <meta property="og:description" content="<%= ogDescription %>" />
-    <meta property="og:image" content="<%= ogImage %>" />
-    <meta property="og:url" content="<%= ogUrl %>" />
+    <meta property="og:title" content="<%= ogTitle || 'Student Result' %>" />
+    <meta
+      property="og:description"
+      content="<%= ogDescription || 'Check out this student\\'s achievement!' %>"
+    />
+    <meta
+      property="og:image"
+      content="<%= ogImage || '/images/default-student.jpg' %>"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:url"
+      content="<%= ogUrl || 'https://one-tick.vercel.app' %>"
+    />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="<%= twitterCard %>" />
-    <meta name="twitter:title" content="<%= twitterTitle %>" />
-    <meta name="twitter:description" content="<%= twitterDescription %>" />
-    <meta name="twitter:image" content="<%= twitterImage %>" />
+    <meta
+      name="twitter:card"
+      content="<%= twitterCard || 'summary_large_image' %>"
+    />
+    <meta
+      name="twitter:title"
+      content="<%= twitterTitle || 'Student Result' %>"
+    />
+    <meta
+      name="twitter:description"
+      content="<%= twitterDescription || 'Check out this student\\'s achievement!' %>"
+    />
+    <meta
+      name="twitter:image"
+      content="<%= twitterImage || '/images/default-student.jpg' %>"
+    />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
       tailwind.config = {
@@ -41,11 +64,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
     />
     <link rel="stylesheet" href="/css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   </head>
   <body
     class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-inter"
   >
-    <!-- Loading Spinner -->
     <div
       id="loadingSpinner"
       class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -231,6 +254,6 @@
         </div>
       </div>
     </div>
-    <script type="module" src="/js/main.js"></script>
+    <script defer src="/js/main.js"></script>
   </body>
 </html>
