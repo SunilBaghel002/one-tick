@@ -142,6 +142,7 @@ app.get("/share/:id", async (req, res) => {
     `;
 
     res.send(html);
+    res.sendFile(path.join(__dirname, "./views/share.html"));
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
