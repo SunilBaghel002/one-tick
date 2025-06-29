@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Student Results</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#10B981",
+              accent1: "#F87171",
+              accent2: "#14B8A6",
+              accent3: "#FBBF24",
+            },
+            borderRadius: {
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-inter"
+  >
+    <div
+      id="adminAccessModal"
+      class="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div
+        class="modal-content bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+      >
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Admin Access</h3>
+        <input
+          type="password"
+          id="adminPassword"
+          class="w-full bg-gray-100 border-none rounded-lg py-3 px-4 mb-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+          placeholder="Enter password"
+          aria-label="Admin password"
+        />
+        <button
+          id="submitPassword"
+          class="w-full bg-primary text-white px-4 py-2 rounded-button hover:bg-primary/90 transition-colors"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+    <div id="adminContent" class="container mx-auto px-4 py-8 hidden">
+      <header
+        class="bg-gradient-to-r from-primary to-indigo-600 text-white py-6 shadow-lg mb-8"
+      >
+        <div class="container mx-auto px-4 flex justify-between items-center">
+          <h1 class="text-3xl font-bold">Admin Panel</h1>
+          <a
+            href="/"
+            class="text-white hover:bg-white/20 px-4 py-2 rounded-button transition-colors"
+            aria-label="Back to Home"
+            >Back to Home</a
+          >
+        </div>
+      </header>
+      <!-- Loading Spinner -->
+      <div
+        id="loadingSpinner"
+        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      >
+        <div
+          class="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
+        ></div>
+      </div>
+      <!-- Toast Notification -->
+      <div
+        id="toast"
+        class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300"
+      ></div>
+      <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+          Add New Student
+        </h2>
+        <form id="studentForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Name</label
+            >
+            <input
+              type="text"
+              name="name"
+              required
+              class="w-full bg-gray-100 border-none rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+              aria-label="Student name"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Course</label
+            >
+            <input
+              type="text"
+              name="course"
+              required
+              class="w-full bg-gray-100 border-none rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+              aria-label="Course"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >College Name</label
+            >
+            <input
+              type="text"
+              name="collegeName"
+              required
+              class="w-full bg-gray-100 border-none rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+              aria-label="College name"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Marks (%)</label
+            >
+            <input
+              type="number"
+              name="marks"
+              required
+              min="0"
+              max="100"
+              class="w-full bg-gray-100 border-none rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary focus:outline-none transition-all appearance-none"
+              aria-label="Marks"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Email</label
+            >
+            <input
+              type="email"
+              name="email"
+              required
+              class="w-full bg-gray-100 border-none rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+              aria-label="Email"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Image URL</label
+            >
+            <input
+              type="url"
+              name="image"
+              required
+              class="w-full bg-gray-100 border-none rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+              aria-label="Image URL"
+            />
+          </div>
+          <div class="md:col-span-2">
+            <button
+              type="submit"
+              class="w-full bg-primary text-white px-4 py-2 rounded-button hover:bg-primary/90 transition-colors"
+            >
+              Add Student
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">All Students</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[800px]">
+            <thead>
+              <tr class="bg-gray-50 border-b">
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Name
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Course
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  College
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Marks
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Email
+                </th>
+                <th
+                  class="py-4 px-6 text-left text-sm font-semibold text-gray-600"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="adminStudentTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>

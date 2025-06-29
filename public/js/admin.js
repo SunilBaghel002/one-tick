@@ -1,62 +1,107 @@
 document.addEventListener("DOMContentLoaded", () => {
   const adminAccessModal = document.getElementById("adminAccessModal");
   const adminContent = document.getElementById("adminContent");
-  const submitPassword = document.getElementById("submitPassword");
   const adminPassword = document.getElementById("adminPassword");
+  const submitPassword = document.getElementById("submitPassword");
   const studentForm = document.getElementById("studentForm");
   const adminStudentTable = document.getElementById("adminStudentTable");
+  const loadingSpinner = document.getElementById("loadingSpinner");
+  const toast = document.getElementById("toast");
 
-  // Admin access with Ctrl+Shift+U
-  document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.shiftKey && e.key === "U") {
-      adminAccessModal.classList.add("active");
-    }
-  });
+  // Show toast notification
+  function showToast(message, isError = false) {
+    toast.textContent = message;
+    toast.classList.add(isError ? "bg-red-600" : "bg-green-600");
+    toast.classList.remove("opacity-0");
+    setTimeout(() => {
+      toast.classList.add("opacity-0");
+    }, 3000);
+  }
 
-  // Password validation via API
+  // Validate admin password
   submitPassword.addEventListener("click", async () => {
-    const response = await fetch("/api/admin/validate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: adminPassword.value }),
-    });
-    const result = await response.json();
-    if (result.success) {
-      adminAccessModal.classList.remove("active");
-      adminContent.classList.remove("hidden");
-      loadStudents();
-    } else {
-      alert("Incorrect password");
+    const password = adminPassword.value;
+    try {
+      loadingSpinner.classList.remove("hidden");
+      const response = await fetch("/api/admin/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        adminAccessModal.classList.add("hidden");
+        adminContent.classList.remove("hidden");
+        fetchStudents();
+      } else {
+        showToast("Invalid password", true);
+      }
+    } catch (err) {
+      console.error("Error validating password:", err);
+      showToast("Error validating password", true);
+    } finally {
+      loadingSpinner.classList.add("hidden");
     }
   });
 
-  // Load students
-  async function loadStudents() {
-    const response = await fetch("/api/students");
-    const students = await response.json();
+  // Fetch students
+  async function fetchStudents() {
+    try {
+      loadingSpinner.classList.remove("hidden");
+      const response = await fetch("/api/students");
+      const students = await response.json();
+      renderStudents(students);
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      showToast("Error fetching students", true);
+    } finally {
+      loadingSpinner.classList.add("hidden");
+    }
+  }
+
+  // Render students
+  function renderStudents(students) {
     adminStudentTable.innerHTML = students
       .map(
         (student) => `
-      <tr class="border-b">
+      <tr class="border-b hover:bg-gray-50">
         <td class="py-4 px-6 text-sm text-gray-600">${student.name}</td>
         <td class="py-4 px-6 text-sm text-gray-600">${student.course}</td>
         <td class="py-4 px-6 text-sm text-gray-600">${student.collegeName}</td>
         <td class="py-4 px-6 text-sm text-gray-600">${student.marks}%</td>
         <td class="py-4 px-6 text-sm text-gray-600">${student.email}</td>
         <td class="py-4 px-6">
-          <button class="text-red-600 hover:text-red-800 delete-btn" data-student-id="${student._id}">Delete</button>
+          <button class="delete-btn text-red-500 hover:text-red-600" data-student-id="${student._id}" aria-label="Delete student">
+            <i class="ri-delete-bin-line ri-lg"></i>
+          </button>
         </td>
       </tr>
     `
       )
       .join("");
 
-    // Delete button handlers
+    // Attach delete button listeners
     document.querySelectorAll(".delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
-        const studentId = e.target.dataset.studentId;
-        await fetch(`/api/students/${studentId}`, { method: "DELETE" });
-        loadStudents();
+        const studentId = e.target.closest("button").dataset.studentId;
+        try {
+          loadingSpinner.classList.remove("hidden");
+          const response = await fetch(`/api/students/${studentId}`, {
+            method: "DELETE",
+          });
+          const result = await response.json();
+          if (result.success) {
+            showToast("Student deleted successfully");
+            fetchStudents();
+          } else {
+            showToast("Failed to delete student", true);
+          }
+        } catch (err) {
+          console.error("Error deleting student:", err);
+          showToast("Error deleting student", true);
+        } finally {
+          loadingSpinner.classList.add("hidden");
+        }
       });
     });
   }
@@ -74,15 +119,24 @@ document.addEventListener("DOMContentLoaded", () => {
       image: formData.get("image"),
     };
     try {
-      await fetch("/api/students", {
+      loadingSpinner.classList.remove("hidden");
+      const response = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
       });
-      studentForm.reset();
-      loadStudents();
+      if (response.ok) {
+        showToast("Student added successfully");
+        studentForm.reset();
+        fetchStudents();
+      } else {
+        showToast("Failed to add student", true);
+      }
     } catch (err) {
-      alert("Failed to add student");
+      console.error("Error adding student:", err);
+      showToast("Error adding student", true);
+    } finally {
+      loadingSpinner.classList.add("hidden");
     }
   });
 });

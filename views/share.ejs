@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Result</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#10B981",
+              accent1: "#F87171",
+              accent2: "#14B8A6",
+              accent3: "#FBBF24",
+            },
+            borderRadius: {
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-inter"
+  >
+    <!-- Loading Spinner -->
+    <div
+      id="loadingSpinner"
+      class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    >
+      <div
+        class="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
+      ></div>
+    </div>
+    <header
+      class="bg-gradient-to-r from-primary to-indigo-600 text-white py-6 shadow-lg"
+    >
+      <div class="container mx-auto px-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Student Result</h1>
+        <a
+          href="/"
+          class="text-white hover:bg-white/20 px-4 py-2 rounded-button transition-colors"
+          aria-label="Back to Home"
+          >Back to Home</a
+        >
+      </div>
+    </header>
+    <div class="container mx-auto px-4 py-8">
+      <div class="bg-white rounded-xl shadow-md p-6 max-w-md mx-auto">
+        <div class="flex items-center mb-6">
+          <div
+            class="w-20 h-20 rounded-full overflow-hidden border-4 border-primary shadow-md mr-4"
+          >
+            <img
+              id="studentImage"
+              class="w-full h-full object-cover object-top"
+              alt="Student image"
+            />
+          </div>
+          <div>
+            <h3 id="studentName" class="text-xl font-bold text-gray-800"></h3>
+            <p id="studentCourse" class="text-gray-600"></p>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">College</p>
+              <p
+                id="studentCollege"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Marks</p>
+              <p
+                id="studentMarks"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p
+                id="studentEmail"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+          </div>
+        </div>
+        <button
+          id="openShareModal"
+          class="w-full bg-primary text-white px-6 py-3 rounded-button hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+          aria-label="Share profile"
+        >
+          <i class="ri-share-line"></i> Share Profile
+        </button>
+      </div>
+    </div>
+    <div
+      id="shareModal"
+      class="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300"
+    >
+      <div
+        class="modal-content bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+      >
+        <button
+          id="closeModal"
+          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          aria-label="Close modal"
+        >
+          <i class="ri-close-line ri-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold text-gray-800 mb-6">
+          Share Student Result
+        </h3>
+        <div class="flex items-center mb-6">
+          <div
+            class="w-16 h-16 rounded-full overflow-hidden border-4 border-primary mr-4"
+          >
+            <img
+              id="modalImage"
+              class="w-full h-full object-cover object-top"
+              alt="Student image"
+            />
+          </div>
+          <div>
+            <h4 id="modalName" class="text-lg font-semibold text-gray-800"></h4>
+            <div class="flex items-center gap-2">
+              <span
+                id="modalRank"
+                class="bg-primary text-white px-2 py-1 rounded-full text-xs font-medium"
+              ></span>
+              <span id="modalCourse" class="text-gray-600"></span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">College</p>
+              <p
+                id="modalCollege"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Marks</p>
+              <p
+                id="modalMarks"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Email</p>
+              <p
+                id="modalEmail"
+                class="text-sm font-semibold text-gray-800"
+              ></p>
+            </div>
+          </div>
+        </div>
+        <div class="relative mb-6">
+          <input
+            id="modalLink"
+            type="text"
+            readonly
+            class="w-full bg-gray-100 border-none rounded-lg py-3 px-4 pr-12 text-gray-700 focus:ring-2 focus:ring-primary focus:outline-none"
+            aria-label="Share link"
+          />
+          <button
+            id="copyLinkBtn"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary"
+            aria-label="Copy share link"
+          >
+            <i class="ri-file-copy-line ri-lg"></i>
+            <span id="copyTooltip" class="tooltip">Copied!</span>
+          </button>
+        </div>
+        <div id="qrCode" class="flex justify-center mb-6"></div>
+        <button
+          id="downloadQrBtn"
+          class="w-full bg-secondary text-white px-6 py-3 rounded-button hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 mb-6"
+          aria-label="Download QR code"
+        >
+          <i class="ri-download-line"></i> Download QR Code
+        </button>
+        <div class="flex justify-center gap-4">
+          <button
+            id="linkedinShareBtn"
+            class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200 transition"
+            aria-label="Share on LinkedIn"
+          >
+            <i class="ri-linkedin-fill ri-xl"></i>
+          </button>
+          <button
+            id="twitterShareBtn"
+            class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 hover:bg-blue-200 transition"
+            aria-label="Share on Twitter"
+          >
+            <i class="ri-twitter-x-fill ri-xl"></i>
+          </button>
+          <button
+            id="whatsappShareBtn"
+            class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition"
+            aria-label="Share on WhatsApp"
+          >
+            <i class="ri-whatsapp-fill ri-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

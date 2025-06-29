@@ -1,38 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   font-family: "Inter", sans-serif;
-  background-color: #f9fafb;
 }
+
 .performer-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, rotate 0.3s ease;
 }
+
 .performer-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
+
 .modal {
-  opacity: 1;
-  visibility: visible;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-.modal.active {
-  opacity: 1;
-  visibility: visible;
-}
+
 .modal-content {
-  transform: scale(0.95);
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
-.modal:not(.opacity-0) .modal-content {
-  transform: scale(1);
-}
+
 .share-button {
   transition: transform 0.2s ease;
 }
+
 .share-button:hover {
   transform: scale(1.05);
 }
+
 .share-button:active {
   transform: scale(0.95);
 }
+
 .position-badge {
   width: 36px;
   height: 36px;
@@ -48,22 +50,32 @@ body {
   left: -12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
+
 .progress-bar {
   height: 8px;
   border-radius: 4px;
   background-color: #e5e7eb;
   overflow: hidden;
 }
+
 .progress-fill {
   height: 100%;
   border-radius: 4px;
   transition: width 1s ease;
 }
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+input:focus,
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+}
+
 .tooltip {
   position: absolute;
   bottom: 100%;
@@ -79,6 +91,7 @@ input[type="number"]::-webkit-outer-spin-button {
   transition: opacity 0.3s, visibility 0.3s;
   white-space: nowrap;
 }
+
 .tooltip::after {
   content: "";
   position: absolute;
@@ -89,13 +102,19 @@ input[type="number"]::-webkit-outer-spin-button {
   border-style: solid;
   border-color: #1f2937 transparent transparent transparent;
 }
-#studentSidebar {
-  transition: transform 0.3s ease;
+
+.student-sidebar-card {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
-.student-sidebar-card{
-  background-color: #dabbeb5e;
-  margin-top: 50px;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 30px;
+
+.student-sidebar-card:hover {
+  border-color: rgba(79, 70, 229, 0.5);
+}
+
+table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+table tr:hover {
+  background-color: #f3f4f6;
 }

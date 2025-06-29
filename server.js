@@ -10,13 +10,22 @@ const app = express();
 const port = 8000;
 
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => console.log("database connected"))
-  .catch((err) => console.log("error", err));
+  .connect(process.env.MONGO_URL, {
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+  })
+  .then(() => console.log("Database connected successfully"))
+  .catch((err) => {
+    console.error("MongoDB connection error:", err.message);
+    process.exit(1);
+  });
 
 // Student Schema
 const studentSchema = new mongoose.Schema({
@@ -25,35 +34,53 @@ const studentSchema = new mongoose.Schema({
   collegeName: String,
   marks: Number,
   email: String,
-  image: String, // Stores image URL
+  image: String,
 });
 const Student = mongoose.model("Student", studentSchema);
 
 // Admin Schema
 const adminSchema = new mongoose.Schema({
-  password: String, // Hashed password
+  password: String,
 });
 const Admin = mongoose.model("Admin", adminSchema);
 
 // Initialize admin password
 async function initializeAdmin() {
-  const adminCount = await Admin.countDocuments();
-  if (adminCount === 0) {
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASS, 10);
-    await new Admin({ password: hashedPassword }).save();
+  try {
+    const adminCount = await Admin.countDocuments();
+    if (adminCount === 0) {
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASS, 10);
+      await new Admin({ password: hashedPassword }).save();
+      console.log("Admin password initialized");
+    }
+  } catch (err) {
+    console.error("Error initializing admin:", err.message);
   }
 }
 initializeAdmin();
 
 // API Routes
 app.get("/api/students", async (req, res) => {
-  const students = await Student.find();
-  res.json(students);
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (err) {
+    console.error("Error fetching students:", err.message);
+    res.status(500).json({ message: "Failed to fetch students" });
+  }
 });
 
 app.get("/api/students/:id", async (req, res) => {
-  const student = await Student.findById(req.params.id);
-  res.json(student);
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.json(student);
+  } catch (err) {
+    console.error("Error fetching student:", err.message);
+    res.status(500).json({ message: "Failed to fetch student" });
+  }
 });
 
 app.post("/api/students", async (req, res) => {
@@ -62,7 +89,7 @@ app.post("/api/students", async (req, res) => {
     await student.save();
     res.json(student);
   } catch (err) {
-    console.error(err);
+    console.error("Error adding student:", err.message);
     res.status(500).json({ message: "Failed to add student" });
   }
 });
@@ -72,29 +99,33 @@ app.delete("/api/students/:id", async (req, res) => {
     await Student.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("Error deleting student:", err.message);
     res.status(500).json({ message: "Failed to delete student" });
   }
 });
 
-// Admin password validation
 app.post("/api/admin/validate", async (req, res) => {
-  const { password } = req.body;
-  const admin = await Admin.findOne();
-  if (!admin) {
-    return res.json({ success: false });
+  try {
+    const { password } = req.body;
+    const admin = await Admin.findOne();
+    if (!admin) {
+      return res.json({ success: false });
+    }
+    const isMatch = await bcrypt.compare(password, admin.password);
+    res.json({ success: isMatch });
+  } catch (err) {
+    console.error("Error validating admin:", err.message);
+    res.status(500).json({ message: "Failed to validate admin" });
   }
-  const isMatch = await bcrypt.compare(password, admin.password);
-  res.json({ success: isMatch });
 });
 
-// Serve HTML pages
+// Serve EJS pages
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "./views/index.html"));
+  res.render("index");
 });
 
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "./views/admin.html"));
+  res.render("admin");
 });
 
 app.get("/share/:id", async (req, res) => {
@@ -114,14 +145,13 @@ app.get("/share/:id", async (req, res) => {
       const title = `${student.name}'s Result`;
       const description = `${student.name} achieved ${student.marks}% in ${student.course} at ${student.collegeName}.`;
 
-      const html = `
+      res.send(`
         <!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>${title}</title>
-          <!-- Open Graph Meta Tags -->
           <meta property="og:title" content="${title}" />
           <meta property="og:description" content="${description}" />
           <meta property="og:image" content="${student.image}" />
@@ -129,7 +159,6 @@ app.get("/share/:id", async (req, res) => {
           <meta property="og:image:height" content="630" />
           <meta property="og:url" content="${shareUrl}" />
           <meta property="og:type" content="website" />
-          <!-- Twitter Card -->
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content="${title}" />
           <meta name="twitter:description" content="${description}" />
@@ -141,13 +170,12 @@ app.get("/share/:id", async (req, res) => {
           <img src="${student.image}" alt="${student.name}" />
         </body>
         </html>
-      `;
-      res.send(html);
+      `);
     } else {
-      res.sendFile(path.join(__dirname, "./views/share.html"));
+      res.render("share");
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error in /share/:id:", err.message);
     res.status(500).send("Server error");
   }
 });
