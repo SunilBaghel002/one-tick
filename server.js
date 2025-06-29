@@ -21,8 +21,8 @@ mongoose
 // Student Schema
 const studentSchema = new mongoose.Schema({
   name: String,
-  course: String, // Changed from 'class'
-  collegeName: String, // Added new field
+  course: String,
+  collegeName: String,
   marks: Number,
   email: String,
   image: String, // Stores image URL
@@ -97,8 +97,53 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "./views/admin.html"));
 });
 
-app.get("/share/:id", (req, res) => {
-  res.sendFile(path.join(__dirname, "./views/share.html"));
+app.get("/share/:id", async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      return res.status(404).send("Student not found");
+    }
+
+    const baseUrl = process.env.VERCEL_URL || "http://localhost:8000";
+    const shareUrl = `${baseUrl}/share/${req.params.id}`;
+    const title = `${student.name}'s Result`;
+    const description = `${student.name} achieved ${student.marks}% in ${student.course} at ${student.collegeName}.`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${title}</title>
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:title" content="${title}" />
+        <meta property="og:description" content="${description}" />
+        <meta property="og:image" content="${student.image}" />
+        <meta property="og:url" content="${shareUrl}" />
+        <meta property="og:type" content="website" />
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${title}" />
+        <meta name="twitter:description" content="${description}" />
+        <meta name="twitter:image" content="${student.image}" />
+      </head>
+      <body>
+        <h1>${title}</h1>
+        <p>${description}</p>
+        <img src="${student.image}" alt="${student.name}" />
+        <script>
+          window.location.href = "${shareUrl}";
+        </script>
+      </body>
+      </html>
+    `;
+
+    res.send(html);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
 
 // Start server
