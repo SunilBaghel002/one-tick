@@ -21,20 +21,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // Validate admin password
   submitPassword.addEventListener("click", async () => {
     const password = adminPassword.value;
+    if (!password) {
+      showToast("Please enter a password", true);
+      return;
+    }
     try {
       loadingSpinner.classList.remove("hidden");
-      const response = await fetch("/api/admin/validate", {
+      const response = await fetch("/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const result = await response.json();
       if (result.success) {
         adminAccessModal.classList.add("hidden");
         adminContent.classList.remove("hidden");
         fetchStudents();
       } else {
-        showToast("Invalid password", true);
+        showToast(result.message || "Invalid password", true);
       }
     } catch (err) {
       console.error("Error validating password:", err);
@@ -49,6 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       loadingSpinner.classList.remove("hidden");
       const response = await fetch("/api/students");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const students = await response.json();
       renderStudents(students);
     } catch (err) {
@@ -89,6 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
           const response = await fetch(`/api/students/${studentId}`, {
             method: "DELETE",
           });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
           const result = await response.json();
           if (result.success) {
             showToast("Student deleted successfully");
