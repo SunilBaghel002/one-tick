@@ -104,45 +104,48 @@ app.get("/share/:id", async (req, res) => {
       return res.status(404).send("Student not found");
     }
 
-    const baseUrl = process.env.VERCEL_URL || "https://one-tick.vercel.app";
-    const shareUrl = `${baseUrl}/share/${req.params.id}`;
-    const title = `${student.name}'s Result`;
-    const description = `${student.name} achieved ${student.marks}% in ${student.course} at ${student.collegeName}.`;
+    const userAgent = req.headers["user-agent"]?.toLowerCase() || "";
+    const isSocialCrawler =
+      /whatsapp|facebookexternalhit|twitterbot|linkedinbot/i.test(userAgent);
 
-    const html = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${title}</title>
-        <!-- Open Graph Meta Tags -->
-        <meta property="og:title" content="${title}" />
-        <meta property="og:description" content="${description}" />
-        <meta property="og:image" content="${student.image}" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:url" content="${shareUrl}" />
-        <meta property="og:type" content="website" />
-        <!-- Twitter Card -->
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="${title}" />
-        <meta name="twitter:description" content="${description}" />
-        <meta name="twitter:image" content="${student.image}" />
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <p>${description}</p>
-        <img src="${student.image}" alt="${student.name}" />
-        <script>
-          window.location.href = "/share/${req.params.id}";
-        </script>
-      </body>
-      </html>
-    `;
+    if (isSocialCrawler) {
+      const baseUrl = process.env.VERCEL_URL || "https://one-tick.vercel.app";
+      const shareUrl = `${baseUrl}/share/${req.params.id}`;
+      const title = `${student.name}'s Result`;
+      const description = `${student.name} achieved ${student.marks}% in ${student.course} at ${student.collegeName}.`;
 
-    res.send(html);
-    res.sendFile(path.join(__dirname, "./views/share.html"));
+      const html = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>${title}</title>
+          <!-- Open Graph Meta Tags -->
+          <meta property="og:title" content="${title}" />
+          <meta property="og:description" content="${description}" />
+          <meta property="og:image" content="${student.image}" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:url" content="${shareUrl}" />
+          <meta property="og:type" content="website" />
+          <!-- Twitter Card -->
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="${title}" />
+          <meta name="twitter:description" content="${description}" />
+          <meta name="twitter:image" content="${student.image}" />
+        </head>
+        <body>
+          <h1>${title}</h1>
+          <p>${description}</p>
+          <img src="${student.image}" alt="${student.name}" />
+        </body>
+        </html>
+      `;
+      res.send(html);
+    } else {
+      res.sendFile(path.join(__dirname, "./views/share.html"));
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
