@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ];
         const scale =
           index === 0 ? "lg:scale-110 hover:rotate-2" : "hover:scale-105";
-        const width = index === 0 ? "lg:w-1/3" : "lg:w-1/4";
+        const width = index === 0 ? "lg:w-1/4" : "lg:w-1/4";
         const order =
           index === 0
             ? "order-1 lg:order-2"
